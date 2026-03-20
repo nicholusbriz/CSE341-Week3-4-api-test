@@ -3,6 +3,7 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 const connectDB = require('./src/database/db');
+const { errorHandler } = require('./src/middleware/errorHandler');
 
 // Import routes
 const userRoutes = require('./src/routes/userRoutes');
@@ -76,41 +77,8 @@ app.use((req, res) => {
   });
 });
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-
-  // Mongoose validation error
-  if (err.name === 'ValidationError') {
-    const errors = Object.values(err.errors).map(error => error.message);
-    return res.status(400).json({
-      success: false,
-      error: `Validation error: ${errors.join(', ')}`
-    });
-  }
-
-  // Mongoose duplicate key error
-  if (err.code === 11000) {
-    return res.status(400).json({
-      success: false,
-      error: 'Duplicate field value entered'
-    });
-  }
-
-  // Mongoose cast error
-  if (err.name === 'CastError') {
-    return res.status(400).json({
-      success: false,
-      error: 'Invalid ID format'
-    });
-  }
-
-  // Default server error
-  res.status(500).json({
-    success: false,
-    error: 'Internal server error'
-  });
-});
+// Global Error Handler Middleware
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
