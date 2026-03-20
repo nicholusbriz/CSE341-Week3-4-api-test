@@ -43,7 +43,19 @@ const swaggerOptions = {
   explorer: true
 };
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
+// Dynamic host configuration for Swagger
+app.use('/api-docs', (req, res, next) => {
+  const host = req.get('host');
+  const protocol = req.get('x-forwarded-proto') || req.protocol;
+
+  // Create a copy of swagger document with dynamic host
+  const swaggerDoc = { ...swaggerDocument };
+  swaggerDoc.host = host;
+  swaggerDoc.schemes = [protocol];
+
+  swaggerUi.serve();
+  return swaggerUi.setup(swaggerDoc, swaggerOptions)(req, res, next);
+});
 
 // Root route
 app.get('/', (req, res) => {

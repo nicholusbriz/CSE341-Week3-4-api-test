@@ -9,6 +9,7 @@
       "email": "support@example.com"
     }
   },
+  "host": "localhost:3000",
   "basePath": "/",
   "tags": [
     {
