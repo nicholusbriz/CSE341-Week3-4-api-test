@@ -9,7 +9,7 @@
       "email": "support@example.com"
     }
   },
-  "host": "localhost:3000",
+  "host": "cse341-ncxu.onrender.com",
   "basePath": "/",
   "tags": [
     {
