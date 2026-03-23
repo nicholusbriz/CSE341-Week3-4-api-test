@@ -1,5 +1,5 @@
 {
-  "user": {
+  "validUser": {
     "firstName": "John",
     "lastName": "Doe",
     "email": "john.doe@example.com",
@@ -12,7 +12,7 @@
     },
     "dateOfBirth": "1995-01-15"
   },
-  "product": {
+  "validProduct": {
     "name": "Wireless Mouse",
     "description": "Ergonomic wireless mouse",
     "price": 29.99,
