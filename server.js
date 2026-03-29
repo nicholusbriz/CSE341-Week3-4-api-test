@@ -92,8 +92,7 @@ app.get('/login', (req, res) => {
 const swaggerOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'W03 Project API Documentation',
-  explorer: true,
-  host: process.env.SWAGGER_HOST || 'localhost:3000'
+  explorer: true
 };
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));

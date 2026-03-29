@@ -9,7 +9,7 @@
       "email": "support@example.com"
     }
   },
-  "host": "localhost:3000",
+  "host": "${SWAGGER_HOST}",
   "basePath": "/",
   "tags": [
     {
@@ -22,8 +22,7 @@
     }
   ],
   "schemes": [
-    "http",
-    "https"
+    "${SWAGGER_SCHEME}"
   ],
   "securityDefinitions": {
     "sessionAuth": {
