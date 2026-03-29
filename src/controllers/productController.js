@@ -3,7 +3,7 @@ const Product = require('../models/Product');
 // Get all products
 exports.getProducts = async (req, res) => {
   try {
-    let query = { isActive: true };
+    let query = {};
 
     // Filter by category if provided
     if (req.query.category) {
@@ -42,13 +42,6 @@ exports.getProduct = async (req, res) => {
       return res.status(404).json({
         success: false,
         error: 'Product not found'
-      });
-    }
-
-    if (!product.isActive) {
-      return res.status(404).json({
-        success: false,
-        error: 'Product is not active'
       });
     }
 
@@ -300,13 +293,6 @@ exports.updateProduct = async (req, res) => {
       });
     }
 
-    if (!product.isActive) {
-      return res.status(404).json({
-        success: false,
-        error: 'Product is not active'
-      });
-    }
-
     res.status(200).json({
       success: true,
       data: product
@@ -346,7 +332,7 @@ exports.updateProduct = async (req, res) => {
 // Delete product
 exports.deleteProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const product = await Product.findByIdAndDelete(req.params.id);
 
     if (!product) {
       return res.status(404).json({
@@ -354,10 +340,6 @@ exports.deleteProduct = async (req, res) => {
         error: 'Product not found'
       });
     }
-
-    // Soft delete - mark as inactive
-    product.isActive = false;
-    await product.save();
 
     res.status(200).json({
       success: true,

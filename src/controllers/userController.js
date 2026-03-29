@@ -3,7 +3,7 @@ const User = require('../models/User');
 // Get all users
 exports.getUsers = async (req, res) => {
   try {
-    const users = await User.find({ isActive: true });
+    const users = await User.find({});
 
     res.status(200).json({
       success: true,
@@ -28,13 +28,6 @@ exports.getUser = async (req, res) => {
       return res.status(404).json({
         success: false,
         error: 'User not found'
-      });
-    }
-
-    if (!user.isActive) {
-      return res.status(404).json({
-        success: false,
-        error: 'User is not active'
       });
     }
 
@@ -166,13 +159,6 @@ exports.updateUser = async (req, res) => {
       });
     }
 
-    if (!user.isActive) {
-      return res.status(404).json({
-        success: false,
-        error: 'User is not active'
-      });
-    }
-
     res.status(200).json({
       success: true,
       data: user
@@ -212,7 +198,7 @@ exports.updateUser = async (req, res) => {
 // Delete user
 exports.deleteUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findByIdAndDelete(req.params.id);
 
     if (!user) {
       return res.status(404).json({
@@ -220,10 +206,6 @@ exports.deleteUser = async (req, res) => {
         error: 'User not found'
       });
     }
-
-    // Soft delete - mark as inactive
-    user.isActive = false;
-    await user.save();
 
     res.status(200).json({
       success: true,

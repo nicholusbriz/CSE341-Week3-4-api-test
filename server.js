@@ -3,11 +3,14 @@ const express = require('express');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger.json');
 const connectDB = require('./src/database/db');
-const { errorHandler } = require('./src/middleware/errorHandler');
+const passport = require('passport');
+const session = require('express-session');
+const GitHubStrategy = require('passport-github').Strategy;
 
 // Import routes
 const userRoutes = require('./src/routes/userRoutes');
 const productRoutes = require('./src/routes/productRoutes');
+const authRoutes = require('./src/routes/authRoutes');
 
 // Connect to database
 connectDB();
@@ -17,6 +20,43 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(express.json());
+app.use(express.static('public'));
+
+// Session configuration
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'fallback-secret-key',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+// GitHub OAuth Strategy
+passport.use(new GitHubStrategy({
+  clientID: process.env.CLIENT_ID,
+  clientSecret: process.env.CLIENT_SECRET,
+  callbackURL: process.env.CALLBACK_URL
+},
+  (accessToken, refreshToken, profile, done) => {
+    // User is authenticated with GitHub
+    return done(null, profile);
+  }
+));
+
+// Serialize and deserialize user for session management
+passport.serializeUser((user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser((user, done) => {
+  done(null, user);
+});
 
 // Enable CORS for all routes
 app.use((req, res, next) => {
@@ -33,8 +73,13 @@ app.use((req, res, next) => {
 });
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
+
+app.get('/login', (req, res) => {
+  res.redirect('/api/auth/github');
+});
 
 // Swagger documentation
 const swaggerOptions = {
@@ -46,17 +91,51 @@ const swaggerOptions = {
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
 
 // Root route
-app.get('/', (req, res) => {
-  res.json({
-    message: 'W03 Project API',
-    version: '1.0.0',
-    description: 'Node.js API with MongoDB and Swagger for CSE 341 W03 Project',
-    documentation: '/api-docs',
-    endpoints: {
-      users: '/api/users',
-      products: '/api/products'
+app.get('/', async (req, res) => {
+  try {
+    const isAuthenticated = req.isAuthenticated();
+    let statusHtml = '';
+
+    if (isAuthenticated && req.user) {
+      statusHtml = `
+        <h2>You are logged in!</h2>
+        <p>User: ${req.user.displayName || req.user.username}</p>
+        <p>ID: ${req.user.id}</p>
+        <a href="/api/auth/logout" style="display: inline-block; padding: 10px 20px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px;">Logout</a>
+      `;
+    } else {
+      statusHtml = `
+        <h2>You are logged out</h2>
+        <p><a href="/login">login here</a></p>
+      `;
     }
-  });
+
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>CSE341 API</title>
+      </head>
+      <body>
+          ${statusHtml}
+      </body>
+      </html>
+    `);
+  } catch (error) {
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>CSE341 API</title>
+      </head>
+      <body>
+          <h1>CSE341 API</h1>
+          <p>Hello, my name is Atbriz and this is my week3 and week4 web service project.</p>
+          <p>API is running...</p>
+      </body>
+      </html>
+    `);
+  }
 });
 
 // Health check endpoint
@@ -76,9 +155,6 @@ app.use((req, res) => {
     error: `Route ${req.originalUrl} not found`
   });
 });
-
-// Global Error Handler Middleware
-app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {

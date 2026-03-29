@@ -9,7 +9,7 @@
       "email": "support@example.com"
     }
   },
-  "host": "cse341-ncxu.onrender.com",
+  "host": "localhost:3000",
   "basePath": "/",
   "tags": [
     {
@@ -22,9 +22,17 @@
     }
   ],
   "schemes": [
+    "http",
     "https"
   ],
-  "securityDefinitions": {},
+  "securityDefinitions": {
+    "sessionAuth": {
+      "type": "apiKey",
+      "in": "cookie",
+      "name": "connect.sid",
+      "description": "Session-based authentication using GitHub OAuth"
+    }
+  },
   "consumes": [
     "application/json"
   ],
@@ -66,6 +74,11 @@
       },
       "post": {
         "description": "",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "body",
@@ -92,6 +105,9 @@
           },
           "400": {
             "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "500": {
             "description": "Internal Server Error"
@@ -127,6 +143,11 @@
       },
       "put": {
         "description": "",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -157,6 +178,9 @@
           "400": {
             "description": "Bad Request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -167,6 +191,11 @@
       },
       "delete": {
         "description": "",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -182,6 +211,9 @@
           "400": {
             "description": "Bad Request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -193,24 +225,7 @@
     },
     "/api/products/": {
       "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "category",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "minPrice",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "maxPrice",
-            "in": "query",
-            "type": "string"
-          }
-        ],
+        "description": "Get all products from the database",
         "responses": {
           "200": {
             "description": "OK"
@@ -222,6 +237,11 @@
       },
       "post": {
         "description": "",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "body",
@@ -264,6 +284,9 @@
           "400": {
             "description": "Bad Request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal Server Error"
           }
@@ -298,6 +321,11 @@
       },
       "put": {
         "description": "",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -343,6 +371,9 @@
           "400": {
             "description": "Bad Request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Not Found"
           },
@@ -353,6 +384,11 @@
       },
       "delete": {
         "description": "",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -368,11 +404,48 @@
           "400": {
             "description": "Bad Request"
           },
+          "401": {
+            "description": "Unauthorized"
+          },
           "404": {
             "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Get current user profile",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully"
+          },
+          "401": {
+            "description": "Not authenticated"
+          }
+        }
+      }
+    },
+    "/api/auth/status": {
+      "get": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Check authentication status",
+        "responses": {
+          "200": {
+            "description": "Authentication status"
           }
         }
       }
