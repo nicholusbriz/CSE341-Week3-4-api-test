@@ -85,7 +85,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 
 app.get('/login', (req, res) => {
-  console.log('Login route accessed, redirecting to GitHub OAuth');
   res.redirect('/api/auth/github');
 });
 
@@ -93,7 +92,8 @@ app.get('/login', (req, res) => {
 const swaggerOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
   customSiteTitle: 'W03 Project API Documentation',
-  explorer: true
+  explorer: true,
+  host: process.env.SWAGGER_HOST || 'localhost:3000'
 };
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
