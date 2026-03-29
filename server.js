@@ -95,7 +95,14 @@ const swaggerOptions = {
   explorer: true
 };
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, swaggerOptions));
+// Replace environment variables in swagger.json
+const swaggerDocumentWithEnv = {
+  ...swaggerDocument,
+  host: process.env.SWAGGER_HOST || 'localhost:3000',
+  schemes: [process.env.SWAGGER_SCHEME || 'http']
+};
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentWithEnv, swaggerOptions));
 
 // Root route
 app.get('/', async (req, res) => {
