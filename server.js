@@ -6,6 +6,7 @@ const connectDB = require('./src/database/db');
 const passport = require('passport');
 const session = require('express-session');
 const GitHubStrategy = require('passport-github').Strategy;
+const MongoStore = require('connect-mongo')(session);
 
 // Import routes
 const userRoutes = require('./src/routes/userRoutes');
@@ -18,12 +19,14 @@ connectDB();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(express.json());
-app.use(express.static('public'));
-
 // Session configuration
 app.use(session({
+  store: process.env.NODE_ENV === 'production'
+    ? new MongoStore({
+      mongoUrl: process.env.MONGODB_URI,
+      collectionName: 'sessions'
+    })
+    : undefined, // MemoryStore for development
   secret: process.env.SESSION_SECRET || 'fallback-secret-key',
   resave: false,
   saveUninitialized: false,
@@ -32,6 +35,10 @@ app.use(session({
     sameSite: 'lax'
   }
 }));
+
+// Middleware
+app.use(express.json());
+app.use(express.static('public'));
 
 // Initialize Passport
 app.use(passport.initialize());
