@@ -6,7 +6,7 @@ const connectDB = require('./src/database/db');
 const passport = require('passport');
 const session = require('express-session');
 const GitHubStrategy = require('passport-github').Strategy;
-const MongoStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo');
 
 // Import routes
 const userRoutes = require('./src/routes/userRoutes');
@@ -22,7 +22,7 @@ const PORT = process.env.PORT || 3000;
 // Session configuration
 app.use(session({
   store: process.env.NODE_ENV === 'production'
-    ? new MongoStore({
+    ? MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
       collectionName: 'sessions'
     })
