@@ -85,6 +85,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 
 app.get('/login', (req, res) => {
+  console.log('Login route accessed, redirecting to GitHub OAuth');
   res.redirect('/api/auth/github');
 });
 
