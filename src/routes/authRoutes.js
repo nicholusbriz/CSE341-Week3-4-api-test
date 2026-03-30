@@ -2,7 +2,10 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 
-router.get('/github', passport.authenticate('github', { prompt: 'consent' }));
+router.get('/github', (req, res, next) => {
+  console.log('GitHub OAuth route accessed');
+  passport.authenticate('github', { prompt: 'consent' })(req, res, next);
+});
 
 router.get('/github/callback',
   passport.authenticate('github', { failureRedirect: '/' }),
@@ -10,6 +13,7 @@ router.get('/github/callback',
     console.log('GitHub OAuth callback successful');
     console.log('User authenticated:', req.isAuthenticated());
     console.log('User data:', req.user);
+    console.log('Session after callback:', req.session);
     res.redirect('/');
   }
 );

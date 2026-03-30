@@ -95,6 +95,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 
 app.get('/login', (req, res) => {
+  console.log('Login route accessed');
+  console.log('Redirecting to:', '/api/auth/github');
   res.redirect('/api/auth/github');
 });
 
