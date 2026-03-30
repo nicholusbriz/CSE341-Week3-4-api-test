@@ -47,12 +47,18 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // GitHub OAuth Strategy
+console.log('GitHub OAuth Strategy setup:');
+console.log('CLIENT_ID:', process.env.CLIENT_ID ? 'Set' : 'Not set');
+console.log('CLIENT_SECRET:', process.env.CLIENT_SECRET ? 'Set' : 'Not set');
+console.log('CALLBACK_URL:', process.env.CALLBACK_URL);
+
 passport.use(new GitHubStrategy({
   clientID: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
   callbackURL: process.env.CALLBACK_URL
 },
   (accessToken, refreshToken, profile, done) => {
+    console.log('GitHub OAuth success - User profile:', profile);
     // User is authenticated with GitHub
     return done(null, profile);
   }
@@ -60,10 +66,12 @@ passport.use(new GitHubStrategy({
 
 // Serialize and deserialize user for session management
 passport.serializeUser((user, done) => {
+  console.log('Serializing user:', user);
   done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
+  console.log('Deserializing user:', user);
   done(null, user);
 });
 
