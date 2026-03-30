@@ -32,7 +32,9 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax'
+    sameSite: 'none',
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
 
@@ -108,6 +110,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentWithEnv, sw
 app.get('/', async (req, res) => {
   try {
     const isAuthenticated = req.isAuthenticated();
+    console.log('Root route - User authenticated:', isAuthenticated);
+    console.log('Root route - Session:', req.session);
+    console.log('Root route - User:', req.user);
+
     let statusHtml = '';
 
     if (isAuthenticated && req.user) {

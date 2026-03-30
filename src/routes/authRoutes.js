@@ -7,6 +7,9 @@ router.get('/github', passport.authenticate('github', { prompt: 'consent' }));
 router.get('/github/callback',
   passport.authenticate('github', { failureRedirect: '/' }),
   (req, res) => {
+    console.log('GitHub OAuth callback successful');
+    console.log('User authenticated:', req.isAuthenticated());
+    console.log('User data:', req.user);
     res.redirect('/');
   }
 );
