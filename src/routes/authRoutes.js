@@ -7,16 +7,43 @@ router.get('/github', (req, res, next) => {
   passport.authenticate('github', { prompt: 'consent' })(req, res, next);
 });
 
-router.get('/github/callback',
-  passport.authenticate('github', { failureRedirect: '/' }),
-  (req, res) => {
-    console.log('GitHub OAuth callback successful');
-    console.log('User authenticated:', req.isAuthenticated());
-    console.log('User data:', req.user);
-    console.log('Session after callback:', req.session);
-    res.redirect('/');
-  }
-);
+router.get('/github/callback', (req, res, next) => {
+  console.log('=== GitHub OAuth callback route accessed ===');
+  console.log('Request URL:', req.originalUrl);
+  console.log('Query params:', req.query);
+  console.log('Session before auth:', req.session);
+
+  passport.authenticate('github', { failureRedirect: '/' }, (err, user, info) => {
+    console.log('Passport authenticate result:');
+    console.log('Error:', err);
+    console.log('User:', user);
+    console.log('Info:', info);
+
+    if (err) {
+      console.log('Authentication error:', err);
+      return next(err);
+    }
+
+    if (!user) {
+      console.log('No user returned, redirecting to failure');
+      return res.redirect('/');
+    }
+
+    req.logIn(user, (err) => {
+      if (err) {
+        console.log('Login error:', err);
+        return next(err);
+      }
+
+      console.log('User logged in successfully');
+      console.log('User authenticated:', req.isAuthenticated());
+      console.log('User data:', req.user);
+      console.log('Session after login:', req.session);
+
+      return res.redirect('/');
+    });
+  })(req, res, next);
+});
 
 router.get('/profile', (req, res) => {
   if (!req.isAuthenticated()) {
