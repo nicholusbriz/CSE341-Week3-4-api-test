@@ -158,17 +158,22 @@ app.listen(PORT, () => {
 
   // Debug: Show all registered routes
   console.log('Registered routes:');
-  app._router.stack.forEach((middleware) => {
-    if (middleware.route) {
-      console.log(`Route: ${middleware.route.path} [${middleware.route.methods}]`);
-    } else if (middleware.name === 'router') {
-      middleware.handle.stack.forEach((handler) => {
-        if (handler.route) {
-          console.log(`Route: ${handler.route.path} [${handler.route.methods}]`);
-        }
-      });
-    }
-  });
+  const router = app._router || app.router;
+  if (router && router.stack) {
+    router.stack.forEach((middleware) => {
+      if (middleware.route) {
+        console.log(`Route: ${middleware.route.path} [${Object.keys(middleware.route.methods).join(', ')}]`);
+      } else if (middleware.name === 'router' && middleware.handle && middleware.handle.stack) {
+        middleware.handle.stack.forEach((handler) => {
+          if (handler.route) {
+            console.log(`Route: ${handler.route.path} [${Object.keys(handler.route.methods).join(', ')}]`);
+          }
+        });
+      }
+    });
+  } else {
+    console.log('Router stack not available');
+  }
 });
 
 module.exports = app;
