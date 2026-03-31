@@ -7,10 +7,6 @@ router.get('/github', (req, res, next) => {
 });
 
 router.get('/github/callback', (req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'https://cse341-ncxu.onrender.com');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-
   passport.authenticate('github', { failureRedirect: '/' })(req, res, next);
 });
 
@@ -39,15 +35,7 @@ router.get('/logout', (req, res, next) => {
     if (err) {
       return next(err);
     }
-    // Clear the session cookie
-    req.session.destroy((err) => {
-      if (err) {
-        return next(err);
-      }
-      // Clear the cookie and redirect to home page
-      res.clearCookie('connect.sid');
-      res.redirect('/');
-    });
+    res.redirect('/');
   });
 });
 
