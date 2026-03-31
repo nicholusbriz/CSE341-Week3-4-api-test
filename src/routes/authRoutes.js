@@ -2,26 +2,29 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 
+// GitHub OAuth login route
 router.get('/github', (req, res, next) => {
   passport.authenticate('github', { prompt: 'consent' })(req, res, next);
 });
 
+// GitHub OAuth callback handler
 router.get('/github/callback', passport.authenticate('github', {
   failureRedirect: '/',
   successRedirect: '/'
 }));
 
+// Get authenticated user profile
 router.get('/profile', (req, res) => {
   if (!req.isAuthenticated()) {
     return res.status(401).json({
       success: false,
-      message: 'Not authenticated'
+      message: 'Authentication required to access profile'
     });
   }
 
   res.json({
     success: true,
-    message: 'User authenticated successfully',
+    message: 'User profile retrieved successfully',
     user: {
       id: req.user.id,
       username: req.user.username,
@@ -31,6 +34,7 @@ router.get('/profile', (req, res) => {
   });
 });
 
+// Logout user and clear session
 router.get('/logout', (req, res, next) => {
   req.logout((err) => {
     if (err) {
@@ -40,14 +44,8 @@ router.get('/logout', (req, res, next) => {
   });
 });
 
+// Check authentication status
 router.get('/status', (req, res) => {
-  console.log('=== Auth Status Debug ===');
-  console.log('Session ID:', req.sessionID);
-  console.log('Session:', req.session);
-  console.log('Is Authenticated:', req.isAuthenticated());
-  console.log('User:', req.user);
-  console.log('Cookies:', req.headers.cookie);
-
   res.json({
     success: true,
     authenticated: req.isAuthenticated(),

@@ -1,50 +1,51 @@
-require("dotenv").config();
-const express = require("express");
-const swaggerUi = require("swagger-ui-express");
-const swaggerDocument = require("./swagger.json");
-const connectDB = require("./src/database/db");
-const passport = require("passport");
-const session = require("express-session");
-const GitHubStrategy = require("passport-github").Strategy;
-const cors = require("cors");
+require('dotenv').config();
+const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./swagger.json');
+const connectDB = require('./src/database/db');
+const passport = require('passport');
+const session = require('express-session');
+const GitHubStrategy = require('passport-github').Strategy;
+const cors = require('cors');
 
-// Import routes
-const userRoutes = require("./src/routes/userRoutes");
-const productRoutes = require("./src/routes/productRoutes");
-const authRoutes = require("./src/routes/authRoutes");
+// Import route handlers
+const userRoutes = require('./src/routes/userRoutes');
+const productRoutes = require('./src/routes/productRoutes');
+const authRoutes = require('./src/routes/authRoutes');
 
-// Connect to database
+// Connect to MongoDB database
 connectDB();
 
+// Initialize Express application
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Session configuration
+// Session configuration for authentication
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "fallback-secret-key",
+    secret: process.env.SESSION_SECRET || 'fallback-secret-key',
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // Temporarily disabled for testing
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000,
+      secure: false, // Compatible with OAuth flows
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
     },
   }),
 );
 
-// Middleware
+// Middleware configuration
 app.use(cors({
   origin: ['https://cse341-ncxu.onrender.com', 'http://localhost:3000'],
   credentials: true
 }));
 app.use(express.json());
 
-// Initialize Passport
+// Passport authentication setup
 app.use(passport.initialize());
 app.use(passport.session());
 
-// GitHub OAuth Strategy
+// GitHub OAuth strategy configuration
 passport.use(
   new GitHubStrategy(
     {
@@ -53,35 +54,38 @@ passport.use(
       callbackURL: process.env.CALLBACK_URL,
     },
     (accessToken, refreshToken, profile, done) => {
+      // GitHub authentication successful
       return done(null, profile);
     },
   ),
 );
 
+// Store user in session
 passport.serializeUser((user, done) => {
   done(null, user);
 });
 
+// Retrieve user from session
 passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-// Routes
-app.use("/api/auth", authRoutes);
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use("/api/users", userRoutes);
-app.use("/api/products", productRoutes);
+// API routes
+app.use('/api/auth', authRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
 
-// Login route
-app.get("/login", (req, res) => {
-  res.redirect("/api/auth/github");
+// Login redirect route
+app.get('/login', (req, res) => {
+  res.redirect('/api/auth/github');
 });
 
-// Root route
-app.get("/", (req, res) => {
+// Root route with authentication status
+app.get('/', (req, res) => {
   const isAuthenticated = req.isAuthenticated();
 
-  let statusHtml = "";
+  let statusHtml = '';
   if (isAuthenticated && req.user) {
     statusHtml = `
       <h2>You are logged in!</h2>
@@ -122,7 +126,7 @@ app.get("/", (req, res) => {
   `);
 });
 
-// 404 handler
+// 404 error handler
 app.use((req, res) => {
   res.status(404).json({
     success: false,

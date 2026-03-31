@@ -1,5 +1,6 @@
+// Authentication middleware - protects routes requiring login
 const authMiddleware = (req, res, next) => {
-  // Check if user is authenticated via session
+  // Verify user is authenticated via session
   if (!req.isAuthenticated || !req.isAuthenticated()) {
     return res.status(401).json({
       success: false,
@@ -7,8 +8,8 @@ const authMiddleware = (req, res, next) => {
       message: 'You must be authenticated to perform this action'
     });
   }
-  
-  // User is authenticated, proceed to next middleware/route
+
+  // User authenticated - proceed to next middleware/route
   next();
 };
 
