@@ -9,7 +9,7 @@
       "email": "support@example.com"
     }
   },
-  "host": "localhost:3000",
+  "host": "cse341-ncxu.onrender.com",
   "basePath": "/",
   "tags": [
     {
@@ -22,16 +22,9 @@
     }
   ],
   "schemes": [
-    "http"
+    "https"
   ],
-  "securityDefinitions": {
-    "sessionAuth": {
-      "type": "apiKey",
-      "in": "cookie",
-      "name": "connect.sid",
-      "description": "Session-based authentication using GitHub OAuth"
-    }
-  },
+  "securityDefinitions": {},
   "consumes": [
     "application/json"
   ],
@@ -39,6 +32,16 @@
     "application/json"
   ],
   "paths": {
+    "/login": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "description": "",
@@ -50,6 +53,59 @@
       }
     },
     "/health": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/github": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/github/callback": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/profile": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "get": {
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/auth/status": {
       "get": {
         "description": "",
         "responses": {
@@ -73,11 +129,6 @@
       },
       "post": {
         "description": "",
-        "security": [
-          {
-            "sessionAuth": []
-          }
-        ],
         "parameters": [
           {
             "name": "body",
@@ -142,11 +193,6 @@
       },
       "put": {
         "description": "",
-        "security": [
-          {
-            "sessionAuth": []
-          }
-        ],
         "parameters": [
           {
             "name": "id",
@@ -190,11 +236,6 @@
       },
       "delete": {
         "description": "",
-        "security": [
-          {
-            "sessionAuth": []
-          }
-        ],
         "parameters": [
           {
             "name": "id",
@@ -224,7 +265,24 @@
     },
     "/api/products/": {
       "get": {
-        "description": "Get all products from the database",
+        "description": "",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "minPrice",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -236,11 +294,6 @@
       },
       "post": {
         "description": "",
-        "security": [
-          {
-            "sessionAuth": []
-          }
-        ],
         "parameters": [
           {
             "name": "body",
@@ -320,11 +373,6 @@
       },
       "put": {
         "description": "",
-        "security": [
-          {
-            "sessionAuth": []
-          }
-        ],
         "parameters": [
           {
             "name": "id",
@@ -383,11 +431,6 @@
       },
       "delete": {
         "description": "",
-        "security": [
-          {
-            "sessionAuth": []
-          }
-        ],
         "parameters": [
           {
             "name": "id",
@@ -411,40 +454,6 @@
           },
           "500": {
             "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/auth/profile": {
-      "get": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Get current user profile",
-        "security": [
-          {
-            "sessionAuth": []
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User profile retrieved successfully"
-          },
-          "401": {
-            "description": "Not authenticated"
-          }
-        }
-      }
-    },
-    "/api/auth/status": {
-      "get": {
-        "tags": [
-          "Authentication"
-        ],
-        "summary": "Check authentication status",
-        "responses": {
-          "200": {
-            "description": "Authentication status"
           }
         }
       }

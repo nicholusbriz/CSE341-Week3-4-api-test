@@ -11,7 +11,7 @@ const doc = {
     }
   },
   host: process.env.SWAGGER_HOST || 'localhost:3000',
-  schemes: ['http', 'https'],
+  schemes: [process.env.SWAGGER_SCHEME || 'http'],
   consumes: ['application/json'],
   produces: ['application/json'],
   tags: [

@@ -26,15 +26,15 @@ app.use(session({
       mongoUrl: process.env.MONGODB_URI,
       collectionName: 'sessions'
     })
-    : undefined, // MemoryStore for development
+    : undefined,
   secret: process.env.SESSION_SECRET || 'fallback-secret-key',
   resave: false,
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'none',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
@@ -47,31 +47,21 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // GitHub OAuth Strategy
-console.log('GitHub OAuth Strategy setup:');
-console.log('CLIENT_ID:', process.env.CLIENT_ID ? 'Set' : 'Not set');
-console.log('CLIENT_SECRET:', process.env.CLIENT_SECRET ? 'Set' : 'Not set');
-console.log('CALLBACK_URL:', process.env.CALLBACK_URL);
-
 passport.use(new GitHubStrategy({
   clientID: process.env.CLIENT_ID,
   clientSecret: process.env.CLIENT_SECRET,
   callbackURL: process.env.CALLBACK_URL
 },
   (accessToken, refreshToken, profile, done) => {
-    console.log('GitHub OAuth success - User profile:', profile);
-    // User is authenticated with GitHub
     return done(null, profile);
   }
 ));
 
-// Serialize and deserialize user for session management
 passport.serializeUser((user, done) => {
-  console.log('Serializing user:', user);
   done(null, user);
 });
 
 passport.deserializeUser((user, done) => {
-  console.log('Deserializing user:', user);
   done(null, user);
 });
 
@@ -82,11 +72,10 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
   if (req.method === 'OPTIONS') {
-    res.header('Access-Control-Max-Age', '86400');
-    res.sendStatus(200);
-  } else {
-    next();
+    res.status(200).end();
+    return;
   }
+  next();
 });
 
 // Routes
@@ -95,8 +84,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 
 app.get('/login', (req, res) => {
-  console.log('Login route accessed');
-  console.log('Redirecting to:', '/api/auth/github');
   res.redirect('/api/auth/github');
 });
 
@@ -108,64 +95,42 @@ const swaggerOptions = {
 };
 
 // Replace environment variables in swagger.json
-const swaggerDocumentWithEnv = {
-  ...swaggerDocument,
-  host: process.env.SWAGGER_HOST || 'localhost:3000',
-  schemes: [process.env.SWAGGER_SCHEME || 'http']
-};
+const swaggerDocumentWithEnv = JSON.parse(JSON.stringify(swaggerDocument)
+  .replace(/\$\{SWAGGER_HOST\}/g, process.env.SWAGGER_HOST || 'localhost:3000')
+  .replace(/\$\{SWAGGER_SCHEME\}/g, process.env.SWAGGER_SCHEME || 'http'));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentWithEnv, swaggerOptions));
 
 // Root route
-app.get('/', async (req, res) => {
-  try {
-    const isAuthenticated = req.isAuthenticated();
-    console.log('Root route - User authenticated:', isAuthenticated);
-    console.log('Root route - Session:', req.session);
-    console.log('Root route - User:', req.user);
+app.get('/', (req, res) => {
+  const isAuthenticated = req.isAuthenticated();
+  let statusHtml = '';
 
-    let statusHtml = '';
-
-    if (isAuthenticated && req.user) {
-      statusHtml = `
-        <h2>You are logged in!</h2>
-        <p>User: ${req.user.displayName || req.user.username}</p>
-        <p>ID: ${req.user.id}</p>
-        <a href="/api/auth/logout" style="display: inline-block; padding: 10px 20px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px;">Logout</a>
-      `;
-    } else {
-      statusHtml = `
-        <h2>You are logged out</h2>
-        <p><a href="/login">login here</a></p>
-      `;
-    }
-
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-          <title>CSE341 API</title>
-      </head>
-      <body>
-          ${statusHtml}
-      </body>
-      </html>
-    `);
-  } catch (error) {
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-          <title>CSE341 API</title>
-      </head>
-      <body>
-          <h1>CSE341 API</h1>
-          <p>Hello, my name is Atbriz and this is my week3 and week4 web service project.</p>
-          <p>API is running...</p>
-      </body>
-      </html>
-    `);
+  if (isAuthenticated && req.user) {
+    statusHtml = `
+      <h2>You are logged in!</h2>
+      <p>User: ${req.user.displayName || req.user.username}</p>
+      <p>ID: ${req.user.id}</p>
+      <a href="/api/auth/logout" style="display: inline-block; padding: 10px 20px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px;">Logout</a>
+    `;
+  } else {
+    statusHtml = `
+      <h2>You are logged out</h2>
+      <p><a href="/login">login here</a></p>
+    `;
   }
+
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>CSE341 API</title>
+    </head>
+    <body>
+        ${statusHtml}
+    </body>
+    </html>
+  `);
 });
 
 // Health check endpoint
