@@ -14,9 +14,6 @@ const userRoutes = require('./src/routes/userRoutes');
 const productRoutes = require('./src/routes/productRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 
-console.log('authRoutes loaded:', typeof authRoutes);
-console.log('authRoutes routes:', authRoutes.stack?.map(layer => layer.route?.path).filter(Boolean));
-
 // Connect to database
 connectDB();
 
@@ -86,17 +83,13 @@ const swaggerDocumentWithEnv = JSON.parse(JSON.stringify(swaggerDocument)
   .replace(/\$\{SWAGGER_SCHEME\}/g, process.env.SWAGGER_SCHEME || 'http'));
 
 // Routes
-console.log('Registering auth routes...');
 app.use('/api/auth', authRoutes);
-console.log('Auth routes registered');
-
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentWithEnv, swaggerOptions));
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 
 // Login route
 app.get('/login', (req, res) => {
-  console.log('Login route accessed');
   res.redirect('/api/auth/github');
 });
 
@@ -155,25 +148,6 @@ app.use((req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-
-  // Debug: Show all registered routes
-  console.log('Registered routes:');
-  const router = app._router || app.router;
-  if (router && router.stack) {
-    router.stack.forEach((middleware) => {
-      if (middleware.route) {
-        console.log(`Route: ${middleware.route.path} [${Object.keys(middleware.route.methods).join(', ')}]`);
-      } else if (middleware.name === 'router' && middleware.handle && middleware.handle.stack) {
-        middleware.handle.stack.forEach((handler) => {
-          if (handler.route) {
-            console.log(`Route: ${handler.route.path} [${Object.keys(handler.route.methods).join(', ')}]`);
-          }
-        });
-      }
-    });
-  } else {
-    console.log('Router stack not available');
-  }
 });
 
 module.exports = app;

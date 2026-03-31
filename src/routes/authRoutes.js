@@ -11,9 +11,10 @@ router.get('/github', (req, res, next) => {
   passport.authenticate('github', { prompt: 'consent' })(req, res, next);
 });
 
-router.get('/github/callback', (req, res, next) => {
-  passport.authenticate('github', { failureRedirect: '/' })(req, res, next);
-});
+router.get('/github/callback', passport.authenticate('github', {
+  failureRedirect: '/',
+  successRedirect: '/'
+}));
 
 router.get('/profile', (req, res) => {
   if (!req.isAuthenticated()) {
