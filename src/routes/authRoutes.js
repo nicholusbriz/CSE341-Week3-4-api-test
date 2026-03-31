@@ -41,6 +41,13 @@ router.get('/logout', (req, res, next) => {
 });
 
 router.get('/status', (req, res) => {
+  console.log('=== Auth Status Debug ===');
+  console.log('Session ID:', req.sessionID);
+  console.log('Session:', req.session);
+  console.log('Is Authenticated:', req.isAuthenticated());
+  console.log('User:', req.user);
+  console.log('Cookies:', req.headers.cookie);
+
   res.json({
     success: true,
     authenticated: req.isAuthenticated(),
