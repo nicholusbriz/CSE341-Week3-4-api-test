@@ -15,6 +15,7 @@ router.get('/github/callback', (req, res, next) => {
   console.log('GitHub callback accessed');
   console.log('Before auth - session:', req.session);
   console.log('Before auth - user:', req.user);
+  console.log('Query params:', req.query);
 
   passport.authenticate('github', {
     failureRedirect: '/',
