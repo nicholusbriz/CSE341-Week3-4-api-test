@@ -6,9 +6,13 @@ router.get('/github', (req, res, next) => {
   passport.authenticate('github', { prompt: 'consent' })(req, res, next);
 });
 
-router.get('/github/callback',
-  passport.authenticate('github', { failureRedirect: '/' })
-);
+router.get('/github/callback', (req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://cse341-ncxu.onrender.com');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+
+  passport.authenticate('github', { failureRedirect: '/' })(req, res, next);
+});
 
 router.get('/profile', (req, res) => {
   if (!req.isAuthenticated()) {
