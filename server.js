@@ -96,6 +96,10 @@ app.get('/login', (req, res) => {
 // Root route
 app.get('/', (req, res) => {
   const isAuthenticated = req.isAuthenticated();
+  console.log('Root route accessed - isAuthenticated:', isAuthenticated);
+  console.log('Session:', req.session);
+  console.log('User:', req.user);
+
   let statusHtml = '';
 
   if (isAuthenticated && req.user) {
