@@ -2,12 +2,29 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 
-router.get('/github', passport.authenticate('github', { prompt: 'consent' }));
+router.get('/github', (req, res, next) => {
+  passport.authenticate('github', { prompt: 'consent' })(req, res, next);
+});
 
 router.get('/github/callback',
-  passport.authenticate('github', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('/');
+  (req, res, next) => {
+    passport.authenticate('github', { failureRedirect: '/' }, (err, user, info) => {
+      if (err) {
+        console.error('OAuth Error:', err);
+        return res.redirect('/?error=auth_failed');
+      }
+      if (!user) {
+        console.error('No user returned from OAuth');
+        return res.redirect('/?error=no_user');
+      }
+      req.logIn(user, (err) => {
+        if (err) {
+          console.error('Login error:', err);
+          return res.redirect('/?error=login_failed');
+        }
+        res.redirect('/');
+      });
+    })(req, res, next);
   }
 );
 
