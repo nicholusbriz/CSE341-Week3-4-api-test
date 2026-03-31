@@ -24,7 +24,8 @@ app.use(session({
   store: process.env.NODE_ENV === 'production'
     ? MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
-      collectionName: 'sessions'
+      collectionName: 'sessions',
+      ttl: 24 * 60 * 60 // 1 day
     })
     : undefined,
   secret: process.env.SESSION_SECRET || 'fallback-secret-key',
@@ -34,7 +35,8 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000
+    maxAge: 24 * 60 * 60 * 1000,
+    domain: process.env.NODE_ENV === 'production' ? '.render.com' : undefined
   }
 }));
 
