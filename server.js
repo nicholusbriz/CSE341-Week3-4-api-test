@@ -14,6 +14,9 @@ const userRoutes = require('./src/routes/userRoutes');
 const productRoutes = require('./src/routes/productRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 
+console.log('authRoutes loaded:', typeof authRoutes);
+console.log('authRoutes routes:', authRoutes.stack?.map(layer => layer.route?.path).filter(Boolean));
+
 // Connect to database
 connectDB();
 
@@ -83,7 +86,10 @@ const swaggerDocumentWithEnv = JSON.parse(JSON.stringify(swaggerDocument)
   .replace(/\$\{SWAGGER_SCHEME\}/g, process.env.SWAGGER_SCHEME || 'http'));
 
 // Routes
+console.log('Registering auth routes...');
 app.use('/api/auth', authRoutes);
+console.log('Auth routes registered');
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentWithEnv, swaggerOptions));
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
