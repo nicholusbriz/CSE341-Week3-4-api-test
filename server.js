@@ -33,7 +33,10 @@ app.use(
 );
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: ['https://cse341-ncxu.onrender.com', 'http://localhost:3000'],
+  credentials: true
+}));
 app.use(express.json());
 
 // Initialize Passport
@@ -67,6 +70,11 @@ app.use("/api/auth", authRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
+
+// Login route
+app.get("/login", (req, res) => {
+  res.redirect("/api/auth/github");
+});
 
 // Root route
 app.get("/", (req, res) => {

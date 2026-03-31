@@ -2,11 +2,6 @@ const express = require('express');
 const passport = require('passport');
 const router = express.Router();
 
-// Test route to verify authRoutes is loaded
-router.get('/test', (req, res) => {
-  res.json({ message: 'authRoutes is working!' });
-});
-
 router.get('/github', (req, res, next) => {
   passport.authenticate('github', { prompt: 'consent' })(req, res, next);
 });
