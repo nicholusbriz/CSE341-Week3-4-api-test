@@ -262,24 +262,8 @@
     },
     "/api/products/": {
       "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "category",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "minPrice",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "maxPrice",
-            "in": "query",
-            "type": "string"
-          }
-        ],
+        "description": "Get all products",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"

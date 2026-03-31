@@ -3,21 +3,7 @@ const Product = require('../models/Product');
 // Get all products
 exports.getProducts = async (req, res) => {
   try {
-    let query = {};
-
-    // Filter by category if provided
-    if (req.query.category) {
-      query.category = req.query.category;
-    }
-
-    // Filter by price range if provided
-    if (req.query.minPrice || req.query.maxPrice) {
-      query.price = {};
-      if (req.query.minPrice) query.price.$gte = parseFloat(req.query.minPrice);
-      if (req.query.maxPrice) query.price.$lte = parseFloat(req.query.maxPrice);
-    }
-
-    const products = await Product.find(query);
+    const products = await Product.find({});
 
     res.status(200).json({
       success: true,
