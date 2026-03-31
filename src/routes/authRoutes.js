@@ -7,24 +7,7 @@ router.get('/github', (req, res, next) => {
 });
 
 router.get('/github/callback',
-  passport.authenticate('github', { failureRedirect: '/' }, (err, user, info) => {
-    if (err) {
-      return res.redirect('/?error=auth_failed');
-    }
-    if (!user) {
-      return res.redirect('/?error=no_user');
-    }
-
-    req.logIn(user, (err) => {
-      if (err) {
-        return res.status(401).json({
-          success: false,
-          message: 'Login failed'
-        });
-      }
-      res.redirect('/');
-    });
-  })
+  passport.authenticate('github', { failureRedirect: '/' })
 );
 
 router.get('/profile', (req, res) => {
