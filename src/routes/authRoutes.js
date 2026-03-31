@@ -11,30 +11,10 @@ router.get('/github', (req, res, next) => {
   passport.authenticate('github', { prompt: 'consent' })(req, res, next);
 });
 
-router.get('/github/callback', (req, res, next) => {
-  console.log('GitHub callback accessed');
-  console.log('Before auth - session:', req.session);
-  console.log('Before auth - user:', req.user);
-  console.log('Query params:', req.query);
-
-  passport.authenticate('github', {
-    failureRedirect: '/',
-    successRedirect: '/',
-    failureFlash: true
-  })(req, res, (err) => {
-    if (err) {
-      console.error('Auth error:', err);
-      return next(err);
-    }
-
-    console.log('After auth - session:', req.session);
-    console.log('After auth - user:', req.user);
-    console.log('Is authenticated:', req.isAuthenticated());
-
-    // User is now authenticated, redirect to home
-    res.redirect('/');
-  });
-});
+router.get('/github/callback', passport.authenticate('github', {
+  failureRedirect: '/',
+  successRedirect: '/'
+}));
 
 router.get('/profile', (req, res) => {
   if (!req.isAuthenticated()) {

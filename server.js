@@ -96,16 +96,11 @@ app.get('/login', (req, res) => {
 // Root route
 app.get('/', (req, res) => {
   const isAuthenticated = req.isAuthenticated();
-  console.log('Root route accessed - isAuthenticated:', isAuthenticated);
-  console.log('Session:', req.session);
-  console.log('User:', req.user);
-
   let statusHtml = '';
 
   if (isAuthenticated && req.user) {
     statusHtml = `
       <h2>You are logged in!</h2>
-      <p>User: ${req.user.displayName || req.user.username}</p>
       <p>ID: ${req.user.id}</p>
       <a href="/api/auth/logout" style="display: inline-block; padding: 10px 20px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px;">Logout</a>
     `;
