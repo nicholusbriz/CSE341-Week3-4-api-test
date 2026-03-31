@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "W03 Project API",
-    "description": "Node.js API with MongoDB and Swagger for CSE 341 W03 Project. This API provides CRUD operations for Users and Products collections with comprehensive validation and error handling.",
+    "title": "W03-04 Project API - CSE341",
+    "description": "Node.js API with MongoDB, OAuth Authentication, and Swagger for CSE 341 W03-04 Project. This API provides CRUD operations for Users and Products collections with comprehensive validation, error handling, and GitHub OAuth security.",
     "version": "1.0.0",
     "contact": {
       "name": "API Support",
@@ -13,114 +13,145 @@
   "basePath": "/",
   "tags": [
     {
+      "name": "Authentication",
+      "description": "GitHub OAuth authentication endpoints"
+    },
+    {
       "name": "Users",
-      "description": "User management operations"
+      "description": "User management operations (POST, PUT, DELETE require authentication)"
     },
     {
       "name": "Products",
-      "description": "Product management operations"
+      "description": "Product management operations (POST, PUT, DELETE require authentication)"
     }
   ],
   "schemes": [
     "https"
   ],
-  "securityDefinitions": {},
+  "securityDefinitions": {
+    "oauth2": {
+      "type": "oauth2",
+      "authorizationUrl": "https://github.com/login/oauth/authorize",
+      "tokenUrl": "https://github.com/login/oauth/access_token",
+      "flow": "implicit",
+      "scopes": {
+        "user": "Read user information"
+      }
+    }
+  },
   "consumes": [
     "application/json"
   ],
   "produces": [
     "application/json"
   ],
+  "x-authentication-note": "POST, PUT, DELETE operations require GitHub OAuth authentication. Login at /login or /api/auth/github",
   "paths": {
     "/login": {
       "get": {
-        "description": "",
+        "tags": ["Authentication"],
+        "description": "Redirect to GitHub OAuth login",
+        "summary": "Login with GitHub",
         "responses": {
-          "200": {
-            "description": "OK"
+          "302": {
+            "description": "Redirect to GitHub OAuth"
           }
         }
       }
     },
     "/": {
       "get": {
-        "description": "",
+        "description": "Home page - shows login status",
+        "summary": "Home page",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "HTML page showing authentication status"
           }
         }
       }
     },
     "/health": {
       "get": {
-        "description": "",
+        "description": "API health check endpoint",
+        "summary": "Health check",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "API is running"
           }
         }
       }
     },
     "/api/auth/github": {
       "get": {
-        "description": "",
+        "tags": ["Authentication"],
+        "description": "Initiate GitHub OAuth flow",
+        "summary": "Start GitHub authentication",
         "responses": {
-          "200": {
-            "description": "OK"
+          "302": {
+            "description": "Redirect to GitHub login"
           }
         }
       }
     },
     "/api/auth/github/callback": {
       "get": {
-        "description": "",
+        "tags": ["Authentication"],
+        "description": "GitHub OAuth callback endpoint (redirects to home after auth)",
+        "summary": "GitHub OAuth callback",
         "responses": {
-          "200": {
-            "description": "OK"
+          "302": {
+            "description": "Redirect to home page after authentication"
           }
         }
       }
     },
     "/api/auth/profile": {
       "get": {
-        "description": "",
+        "tags": ["Authentication"],
+        "description": "Get authenticated user's profile (Requires login)",
+        "summary": "Get user profile",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "User profile information"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Not authenticated"
           }
         }
       }
     },
     "/api/auth/logout": {
       "get": {
-        "description": "",
+        "tags": ["Authentication"],
+        "description": "Logout the current user",
+        "summary": "Logout",
         "responses": {
-          "200": {
-            "description": "OK"
+          "302": {
+            "description": "Redirect to home page after logout"
           }
         }
       }
     },
     "/api/auth/status": {
       "get": {
-        "description": "",
+        "tags": ["Authentication"],
+        "description": "Check if user is authenticated",
+        "summary": "Get authentication status",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Authentication status with user info if logged in"
           }
         }
       }
     },
     "/api/users/": {
       "get": {
-        "description": "",
+        "tags": ["Users"],
+        "description": "Get all users (Public - No authentication required)",
+        "summary": "Get all users",
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Successfully retrieved users"
           },
           "500": {
             "description": "Internal Server Error"
@@ -128,36 +159,65 @@
         }
       },
       "post": {
-        "description": "",
+        "tags": ["Users"],
+        "description": "Create a new user (Requires GitHub OAuth authentication)",
+        "summary": "Create new user - REQUIRES LOGIN",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
+              "required": ["firstName", "lastName", "email", "phone", "address", "dateOfBirth"],
               "properties": {
-                "address": {
-                  "example": "any"
+                "firstName": {
+                  "type": "string",
+                  "minLength": 2,
+                  "example": "John"
+                },
+                "lastName": {
+                  "type": "string",
+                  "minLength": 2,
+                  "example": "Doe"
                 },
                 "email": {
-                  "example": "any"
+                  "type": "string",
+                  "format": "email",
+                  "example": "john@example.com"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "+1 (555) 123-4567"
+                },
+                "address": {
+                  "type": "object",
+                  "required": ["street", "city", "state", "zipCode"],
+                  "properties": {
+                    "street": { "type": "string", "example": "123 Main St" },
+                    "city": { "type": "string", "example": "New York" },
+                    "state": { "type": "string", "example": "NY" },
+                    "zipCode": { "type": "string", "example": "10001" }
+                  }
+                },
+                "dateOfBirth": {
+                  "type": "string",
+                  "format": "date",
+                  "example": "1990-01-15"
                 }
               }
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
           "201": {
-            "description": "Created"
+            "description": "User created successfully"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad Request - Validation error"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized - Must be logged in with GitHub"
           },
           "500": {
             "description": "Internal Server Error"
@@ -167,24 +227,27 @@
     },
     "/api/users/{id}": {
       "get": {
-        "description": "",
+        "tags": ["Users"],
+        "description": "Get a single user by ID (Public - No authentication required)",
+        "summary": "Get user by ID",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "User ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "User found successfully"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad Request - Invalid ID format"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found - User not found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -192,42 +255,46 @@
         }
       },
       "put": {
-        "description": "",
+        "tags": ["Users"],
+        "description": "Update a user (Requires GitHub OAuth authentication)",
+        "summary": "Update user - REQUIRES LOGIN",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "User ID to update"
           },
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "email": {
-                  "example": "any"
-                },
-                "address": {
-                  "example": "any"
-                }
+                "firstName": { "type": "string", "minLength": 2 },
+                "lastName": { "type": "string", "minLength": 2 },
+                "email": { "type": "string", "format": "email" },
+                "phone": { "type": "string" },
+                "address": { "type": "object" },
+                "dateOfBirth": { "type": "string", "format": "date" }
               }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "User updated successfully"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad Request - Invalid ID or validation error"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized - Must be logged in with GitHub"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found - User not found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -235,27 +302,30 @@
         }
       },
       "delete": {
-        "description": "",
+        "tags": ["Users"],
+        "description": "Delete a user (Requires GitHub OAuth authentication)",
+        "summary": "Delete user - REQUIRES LOGIN",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "User ID to delete"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "User deleted successfully"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad Request - Invalid ID format"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized - Must be logged in with GitHub"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found - User not found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -265,27 +335,32 @@
     },
     "/api/products/": {
       "get": {
-        "description": "",
+        "tags": ["Products"],
+        "description": "Get all products with optional filtering (Public - No authentication required)",
+        "summary": "Get all products",
         "parameters": [
           {
             "name": "category",
             "in": "query",
-            "type": "string"
+            "type": "string",
+            "description": "Filter by product category"
           },
           {
             "name": "minPrice",
             "in": "query",
-            "type": "string"
+            "type": "string",
+            "description": "Minimum price filter"
           },
           {
             "name": "maxPrice",
             "in": "query",
-            "type": "string"
+            "type": "string",
+            "description": "Maximum price filter"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Successfully retrieved products"
           },
           "500": {
             "description": "Internal Server Error"
@@ -293,51 +368,41 @@
         }
       },
       "post": {
-        "description": "",
+        "tags": ["Products"],
+        "description": "Create a new product (Requires GitHub OAuth authentication)",
+        "summary": "Create new product - REQUIRES LOGIN",
         "parameters": [
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
+              "required": ["name", "description", "price", "category", "stock", "sku", "brand"],
               "properties": {
-                "price": {
-                  "example": "any"
-                },
-                "stock": {
-                  "example": "any"
-                },
-                "sku": {
-                  "example": "any"
-                },
-                "category": {
-                  "example": "any"
-                },
-                "dimensions": {
-                  "example": "any"
-                },
-                "weight": {
-                  "example": "any"
-                },
-                "tags": {
-                  "example": "any"
-                }
+                "name": { "type": "string", "minLength": 3, "example": "Product Name" },
+                "description": { "type": "string", "minLength": 10, "example": "Product description..." },
+                "price": { "type": "number", "minimum": 0.01, "example": 29.99 },
+                "category": { "type": "string", "enum": ["Electronics", "Clothing", "Books", "Home", "Sports", "Toys", "Food", "Other"] },
+                "stock": { "type": "integer", "minimum": 0, "example": 50 },
+                "sku": { "type": "string", "example": "SKU-12345" },
+                "brand": { "type": "string", "example": "Brand Name" },
+                "weight": { "type": "number", "minimum": 0 },
+                "dimensions": { "type": "object" },
+                "tags": { "type": "array", "items": { "type": "string" } }
               }
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "OK"
-          },
           "201": {
-            "description": "Created"
+            "description": "Product created successfully"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad Request - Validation error"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized - Must be logged in with GitHub"
           },
           "500": {
             "description": "Internal Server Error"
@@ -347,24 +412,27 @@
     },
     "/api/products/{id}": {
       "get": {
-        "description": "",
+        "tags": ["Products"],
+        "description": "Get a single product by ID (Public - No authentication required)",
+        "summary": "Get product by ID",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Product ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Product found successfully"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad Request - Invalid ID format"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found - Product not found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -372,57 +440,50 @@
         }
       },
       "put": {
-        "description": "",
+        "tags": ["Products"],
+        "description": "Update a product (Requires GitHub OAuth authentication)",
+        "summary": "Update product - REQUIRES LOGIN",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Product ID to update"
           },
           {
             "name": "body",
             "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "sku": {
-                  "example": "any"
-                },
-                "category": {
-                  "example": "any"
-                },
-                "price": {
-                  "example": "any"
-                },
-                "stock": {
-                  "example": "any"
-                },
-                "dimensions": {
-                  "example": "any"
-                },
-                "weight": {
-                  "example": "any"
-                },
-                "tags": {
-                  "example": "any"
-                }
+                "name": { "type": "string" },
+                "description": { "type": "string" },
+                "price": { "type": "number" },
+                "stock": { "type": "integer" },
+                "category": { "type": "string" },
+                "sku": { "type": "string" },
+                "brand": { "type": "string" },
+                "weight": { "type": "number" },
+                "dimensions": { "type": "object" },
+                "tags": { "type": "array", "items": { "type": "string" } }
               }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "Product updated successfully"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad Request - Invalid ID or validation error"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized - Must be logged in with GitHub"
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not Found - Product not found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -430,13 +491,36 @@
         }
       },
       "delete": {
-        "description": "",
+        "tags": ["Products"],
+        "description": "Delete a product (Requires GitHub OAuth authentication)",
+        "summary": "Delete product - REQUIRES LOGIN",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "description": "Product ID to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deleted successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid ID format"
+          },
+          "401": {
+            "description": "Unauthorized - Must be logged in with GitHub"
+          },
+          "404": {
+            "description": "Not Found - Product not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
           }
         ],
         "responses": {
