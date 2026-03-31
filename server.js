@@ -96,6 +96,7 @@ app.use('/api/products', productRoutes);
 
 // Login route
 app.get('/login', (req, res) => {
+  console.log('Login route accessed');
   res.redirect('/api/auth/github');
 });
 
@@ -154,6 +155,20 @@ app.use((req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+
+  // Debug: Show all registered routes
+  console.log('Registered routes:');
+  app._router.stack.forEach((middleware) => {
+    if (middleware.route) {
+      console.log(`Route: ${middleware.route.path} [${middleware.route.methods}]`);
+    } else if (middleware.name === 'router') {
+      middleware.handle.stack.forEach((handler) => {
+        if (handler.route) {
+          console.log(`Route: ${handler.route.path} [${handler.route.methods}]`);
+        }
+      });
+    }
+  });
 });
 
 module.exports = app;
