@@ -9,8 +9,11 @@ const {
   deleteUser
 } = require('../controllers/userController');
 
+// Public routes
 router.get('/', getUsers);
 router.get('/:id', getUser);
+
+// Protected routes (require authentication)
 router.post('/', authMiddleware, createUser);
 router.put('/:id', authMiddleware, updateUser);
 router.delete('/:id', authMiddleware, deleteUser);

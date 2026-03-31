@@ -25,7 +25,6 @@ exports.getProducts = async (req, res) => {
       data: products
     });
   } catch (error) {
-    console.error('Error fetching products:', error);
     res.status(500).json({
       success: false,
       error: 'Server error while fetching products'
@@ -50,8 +49,6 @@ exports.getProduct = async (req, res) => {
       data: product
     });
   } catch (error) {
-    console.error('Error fetching product:', error);
-
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
@@ -166,8 +163,6 @@ exports.createProduct = async (req, res) => {
       data: product
     });
   } catch (error) {
-    console.error('Error creating product:', error);
-
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -298,8 +293,6 @@ exports.updateProduct = async (req, res) => {
       data: product
     });
   } catch (error) {
-    console.error('Error updating product:', error);
-
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
@@ -346,8 +339,6 @@ exports.deleteProduct = async (req, res) => {
       data: { message: 'Product deleted successfully' }
     });
   } catch (error) {
-    console.error('Error deleting product:', error);
-
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,

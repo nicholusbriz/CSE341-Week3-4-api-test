@@ -7,6 +7,7 @@ const passport = require('passport');
 const session = require('express-session');
 const GitHubStrategy = require('passport-github').Strategy;
 const MongoStore = require('connect-mongo');
+const cors = require('cors');
 
 // Import routes
 const userRoutes = require('./src/routes/userRoutes');
@@ -24,8 +25,7 @@ app.use(session({
   store: process.env.NODE_ENV === 'production'
     ? MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
-      collectionName: 'sessions',
-      ttl: 24 * 60 * 60 // 1 day
+      collectionName: 'sessions'
     })
     : undefined,
   secret: process.env.SESSION_SECRET || 'fallback-secret-key',
@@ -35,12 +35,12 @@ app.use(session({
     secure: process.env.NODE_ENV === 'production',
     sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000,
-    domain: process.env.NODE_ENV === 'production' ? '.render.com' : undefined
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
 // Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
@@ -67,28 +67,6 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-// Enable CORS for all routes
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-  next();
-});
-
-// Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/products', productRoutes);
-
-app.get('/login', (req, res) => {
-  res.redirect('/api/auth/github');
-});
-
 // Swagger documentation
 const swaggerOptions = {
   customCss: '.swagger-ui .topbar { display: none }',
@@ -101,7 +79,16 @@ const swaggerDocumentWithEnv = JSON.parse(JSON.stringify(swaggerDocument)
   .replace(/\$\{SWAGGER_HOST\}/g, process.env.SWAGGER_HOST || 'localhost:3000')
   .replace(/\$\{SWAGGER_SCHEME\}/g, process.env.SWAGGER_SCHEME || 'http'));
 
+// Routes
+app.use('/api/auth', authRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocumentWithEnv, swaggerOptions));
+app.use('/api/users', userRoutes);
+app.use('/api/products', productRoutes);
+
+// Login route
+app.get('/login', (req, res) => {
+  res.redirect('/api/auth/github');
+});
 
 // Root route
 app.get('/', (req, res) => {
@@ -130,6 +117,8 @@ app.get('/', (req, res) => {
     </head>
     <body>
         ${statusHtml}
+        <p><a href="/api-docs">API Documentation</a></p>
+        <p><a href="/health">Health Check</a></p>
     </body>
     </html>
   `);
@@ -156,8 +145,6 @@ app.use((req, res) => {
 // Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
-  console.log(`Swagger documentation available at: http://localhost:${PORT}/api-docs`);
-  console.log(`Health check available at: http://localhost:${PORT}/health`);
 });
 
 module.exports = app;

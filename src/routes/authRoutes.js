@@ -7,35 +7,22 @@ router.get('/github', (req, res, next) => {
 });
 
 router.get('/github/callback',
-  (req, res, next) => {
-    console.log('OAuth callback - Session ID:', req.sessionID);
-    console.log('OAuth callback - Session before auth:', req.session);
+  passport.authenticate('github', { failureRedirect: '/' }, (err, user, info) => {
+    if (err) {
+      return res.redirect('/?error=auth_failed');
+    }
+    if (!user) {
+      return res.redirect('/?error=no_user');
+    }
 
-    passport.authenticate('github', { failureRedirect: '/' }, (err, user, info) => {
+    req.logIn(user, (err) => {
       if (err) {
-        console.error('OAuth Error:', err);
-        return res.redirect('/?error=auth_failed');
-      }
-      if (!user) {
-        console.error('No user returned from OAuth');
-        return res.redirect('/?error=no_user');
+        return res.redirect('/?error=login_failed');
       }
 
-      console.log('OAuth callback - User received:', user);
-
-      req.logIn(user, (err) => {
-        if (err) {
-          console.error('Login error:', err);
-          return res.redirect('/?error=login_failed');
-        }
-
-        console.log('OAuth callback - Session after login:', req.session);
-        console.log('OAuth callback - Is authenticated:', req.isAuthenticated());
-
-        res.redirect('/');
-      });
-    })(req, res, next);
-  }
+      res.redirect('/');
+    });
+  })
 );
 
 router.get('/profile', (req, res) => {

@@ -11,7 +11,6 @@ exports.getUsers = async (req, res) => {
       data: users
     });
   } catch (error) {
-    console.error('Error fetching users:', error);
     res.status(500).json({
       success: false,
       error: 'Server error while fetching users'
@@ -36,8 +35,6 @@ exports.getUser = async (req, res) => {
       data: user
     });
   } catch (error) {
-    console.error('Error fetching user:', error);
-
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
@@ -92,8 +89,6 @@ exports.createUser = async (req, res) => {
       data: user
     });
   } catch (error) {
-    console.error('Error creating user:', error);
-
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map(err => err.message);
       return res.status(400).json({
@@ -164,8 +159,6 @@ exports.updateUser = async (req, res) => {
       data: user
     });
   } catch (error) {
-    console.error('Error updating user:', error);
-
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
@@ -212,8 +205,6 @@ exports.deleteUser = async (req, res) => {
       data: { message: 'User deleted successfully' }
     });
   } catch (error) {
-    console.error('Error deleting user:', error);
-
     if (error.name === 'CastError') {
       return res.status(400).json({
         success: false,
