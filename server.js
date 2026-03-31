@@ -26,7 +26,8 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: process.env.NODE_ENV === "production", // Secure for Render, false for local dev
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
     },
   }),
@@ -78,15 +79,44 @@ app.get("/login", (req, res) => {
 
 // Root route
 app.get("/", (req, res) => {
+  const isAuthenticated = req.isAuthenticated();
+
+  let statusHtml = "";
+  if (isAuthenticated && req.user) {
+    statusHtml = `
+      <h2>You are logged in!</h2>
+      <p>User: ${req.user.displayName || req.user.username}</p>
+      <p>ID: ${req.user.id}</p>
+      <a href="/api/auth/logout" style="display: inline-block; padding: 10px 20px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px;">Logout</a>
+    `;
+  } else {
+    statusHtml = `
+      <h2>You are not logged in</h2>
+      <p><a href="/login" style="display: inline-block; padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px;">Login with GitHub</a></p>
+    `;
+  }
+
   res.send(`
     <!DOCTYPE html>
     <html>
     <head>
         <title>CSE341 API</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; }
+            .container { max-width: 600px; margin: 0 auto; }
+            .links { margin-top: 20px; }
+            .links a { display: block; margin: 10px 0; }
+        </style>
     </head>
     <body>
-        <h1>CSE341 Week 3-4 Project API</h1>
-        <p><a href="/api-docs">API Documentation</a></p>
+        <div class="container">
+            <h1>CSE341 Week 3-4 Project API</h1>
+            ${statusHtml}
+            <div class="links">
+                <p><a href="/api-docs">API Documentation</a></p>
+                <p><a href="/api/auth/status">Check Authentication Status</a></p>
+            </div>
+        </div>
     </body>
     </html>
   `);

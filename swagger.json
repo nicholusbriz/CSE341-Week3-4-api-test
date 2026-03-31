@@ -42,17 +42,17 @@
     "application/json"
   ],
   "paths": {
-    "/": {
+    "/login": {
       "get": {
         "description": "",
         "responses": {
-          "200": {
-            "description": "OK"
+          "default": {
+            "description": ""
           }
         }
       }
     },
-    "/api/auth/test": {
+    "/": {
       "get": {
         "description": "",
         "responses": {
