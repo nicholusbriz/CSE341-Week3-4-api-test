@@ -6,7 +6,6 @@ const connectDB = require("./src/database/db");
 const passport = require("passport");
 const session = require("express-session");
 const GitHubStrategy = require("passport-github").Strategy;
-const MongoStore = require("connect-mongo");
 const cors = require("cors");
 
 // Import routes
@@ -23,31 +22,19 @@ const PORT = process.env.PORT || 3000;
 // Session configuration
 app.use(
   session({
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI,
-      collectionName: "sessions",
-    }),
     secret: process.env.SESSION_SECRET || "fallback-secret-key",
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: true,
-      sameSite: "lax",
-      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Secure for Render, false for local dev
       maxAge: 24 * 60 * 60 * 1000,
     },
   }),
 );
 
 // Middleware
-app.use(
-  cors({
-    origin: "https://cse341-ncxu.onrender.com",
-    credentials: true,
-  }),
-);
+app.use(cors());
 app.use(express.json());
-app.use(express.static("public"));
 
 // Initialize Passport
 app.use(passport.initialize());
@@ -75,58 +62,14 @@ passport.deserializeUser((user, done) => {
   done(null, user);
 });
 
-// Swagger documentation
-const swaggerOptions = {
-  customCss: ".swagger-ui .topbar { display: none }",
-  customSiteTitle: "W03 Project API Documentation",
-  explorer: true,
-};
-
-// Replace environment variables in swagger.json
-const swaggerDocumentWithEnv = JSON.parse(
-  JSON.stringify(swaggerDocument)
-    .replace(
-      /\$\{SWAGGER_HOST\}/g,
-      process.env.SWAGGER_HOST || "localhost:3000",
-    )
-    .replace(/\$\{SWAGGER_SCHEME\}/g, process.env.SWAGGER_SCHEME || "http"),
-);
-
 // Routes
 app.use("/api/auth", authRoutes);
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerDocumentWithEnv, swaggerOptions),
-);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 
-// Login route
-app.get("/login", (req, res) => {
-  res.redirect("/api/auth/github");
-});
-
 // Root route
 app.get("/", (req, res) => {
-  const isAuthenticated = req.isAuthenticated();
-
-  // Dynamic content based on authentication status
-  let statusHtml = "";
-  if (isAuthenticated && req.user) {
-    statusHtml = `
-      <h2>You are logged in!</h2>
-      <p>User: ${req.user.displayName || req.user.username}</p>
-      <p>ID: ${req.user.id}</p>
-      <a href="/api/auth/logout" style="display: inline-block; padding: 10px 20px; background: #dc3545; color: white; text-decoration: none; border-radius: 5px;">Logout</a>
-    `;
-  } else {
-    statusHtml = `
-      <h2>You are logged out</h2>
-      <p><a href="/login">login here</a></p>
-    `;
-  }
-
   res.send(`
     <!DOCTYPE html>
     <html>
@@ -134,22 +77,11 @@ app.get("/", (req, res) => {
         <title>CSE341 API</title>
     </head>
     <body>
-        ${statusHtml}
+        <h1>CSE341 Week 3-4 Project API</h1>
         <p><a href="/api-docs">API Documentation</a></p>
-        <p><a href="/health">Health Check</a></p>
     </body>
     </html>
   `);
-});
-
-// Health check endpoint
-app.get("/health", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "API is running",
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-  });
 });
 
 // 404 handler
