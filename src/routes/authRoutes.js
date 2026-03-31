@@ -17,9 +17,11 @@ router.get('/github/callback',
 
     req.logIn(user, (err) => {
       if (err) {
-        return res.redirect('/?error=login_failed');
+        return res.status(401).json({
+          success: false,
+          message: 'Login failed'
+        });
       }
-
       res.redirect('/');
     });
   })
