@@ -73,47 +73,44 @@ exports.createProduct = async (req, res) => {
 
 exports.updateProduct = async (req, res) => {
   try {
+    const { id } = req.params;
     const { name, description, price, category, stock, sku, brand } = req.body;
 
-    if (!name || !description || !category || !sku || !brand || price === undefined || stock === undefined) {
-      return res.status(400).json({
-        success: false,
-        error: "Missing required fields"
-      });
-    }
-
-    const product = await Product.findByIdAndUpdate(
-      req.params.id,
-      {
-        name,
-        description,
-        price,
-        category,
-        stock,
-        sku,
-        brand,
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    if (!product) {
+    // Check if product exists
+    const existingProduct = await Product.findById(id);
+    if (!existingProduct) {
       return res.status(404).json({
         success: false,
-        error: "Product not found"
+        error: 'Product not found'
       });
     }
+
+    //Bulid update object
+    const updateFields = {};
+    if (name !== undefined) updateFields.name = name;
+    if (description !== undefined) updateFields.description = description;
+    if (price !== undefined) updateFields.price = price;
+    if (category !== undefined) updateFields.category = category;
+    if (stock !== undefined) updateFields.stock = stock;
+    if (sku !== undefined) updateFields.sku = sku;
+    if (brand !== undefined) updateFields.brand = brand;
+
+    const result = await Product.updateOne(
+      { _id: id },
+      { $set: updateFields }
+    );
 
     res.status(200).json({
       success: true,
-      data: product
+      data: {
+        id: id,
+        ...updateFields
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: "Server error"
+      error: error.message
     });
   }
 };

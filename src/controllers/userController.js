@@ -73,47 +73,44 @@ exports.createUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
+    const { id } = req.params;
     const { firstName, lastName, email, phone, address, dateOfBirth, role } = req.body;
 
-    if (!firstName || !lastName || !email || !phone || !address || !dateOfBirth || !role) {
-      return res.status(400).json({
-        success: false,
-        error: "Missing required fields"
-      });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      req.params.id,
-      {
-        firstName,
-        lastName,
-        email,
-        phone,
-        address,
-        dateOfBirth,
-        role,
-      },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    if (!user) {
+    // Check if user exists
+    const existingUser = await User.findById(id);
+    if (!existingUser) {
       return res.status(404).json({
         success: false,
-        error: "User not found"
+        error: 'User not found'
       });
     }
+
+    // Build update object with only provided fields
+    const updateFields = {};
+    if (firstName !== undefined) updateFields.firstName = firstName;
+    if (lastName !== undefined) updateFields.lastName = lastName;
+    if (email !== undefined) updateFields.email = email;
+    if (phone !== undefined) updateFields.phone = phone;
+    if (address !== undefined) updateFields.address = address;
+    if (dateOfBirth !== undefined) updateFields.dateOfBirth = dateOfBirth;
+    if (role !== undefined) updateFields.role = role;
+
+    const result = await User.updateOne(
+      { _id: id },
+      { $set: updateFields }
+    );
 
     res.status(200).json({
       success: true,
-      data: user
+      data: {
+        id: id,
+        ...updateFields
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: "Server error"
+      error: error.message
     });
   }
 };
