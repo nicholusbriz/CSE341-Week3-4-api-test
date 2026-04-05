@@ -73,9 +73,31 @@ exports.createUser = async (req, res) => {
 
 exports.updateUser = async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const { firstName, lastName, email, phone, address, dateOfBirth, role } = req.body;
+
+    if (!firstName || !lastName || !email || !phone || !address || !dateOfBirth || !role) {
+      return res.status(400).json({
+        success: false,
+        error: "Missing required fields"
+      });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      {
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        dateOfBirth,
+        role,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
 
     if (!user) {
       return res.status(404).json({
