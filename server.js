@@ -5,7 +5,6 @@ const swaggerDocument = require("./swagger.json");
 const connectDB = require("./src/database/db");
 const passport = require("passport");
 const session = require("express-session");
-const { MongoStore } = require("connect-mongo");
 const GitHubStrategy = require("passport-github").Strategy;
 const cors = require("cors");
 
@@ -24,7 +23,6 @@ app.use(session({
   secret: process.env.SESSION_SECRET || "mysecretkey",
   resave: false,
   saveUninitialized: false,
-  store: MongoStore.create({ mongoUrl: process.env.MONGODB_URI }),
   cookie: { secure: false, sameSite: "lax", maxAge: 24 * 60 * 60 * 1000 },
 }));
 
