@@ -1,3 +1,4 @@
+require("dotenv").config();
 const swaggerAutogen = require("swagger-autogen")();
 
 const doc = {
@@ -11,6 +12,13 @@ const doc = {
   consumes: ["application/json"],
   produces: ["application/json"],
   tags: [{ name: "Users" }, { name: "Products" }],
+  ignore: [
+    "/login",
+    "/",
+    "/api/auth/github",
+    "/api/auth/github/callback",
+    "/api/auth/logout",
+  ],
   definitions: {
     User: {
       type: "object",

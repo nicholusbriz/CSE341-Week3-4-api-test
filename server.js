@@ -58,34 +58,34 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 
-app.get("/login", (req, res) => {
-  if (req.isAuthenticated && req.isAuthenticated()) {
-    return res.redirect("/?message=already_logged_in");
-  }
-  res.redirect("/api/auth/github");
-});
+// app.get("/login", (req, res) => {
+//   if (req.isAuthenticated && req.isAuthenticated()) {
+//     return res.redirect("/?message=already_logged_in");
+//   }
+//   res.redirect("/api/auth/github");
+// });
 
-app.get("/", (req, res) => {
-  const auth = req.isAuthenticated && req.isAuthenticated();
-  let message = "";
+// app.get("/", (req, res) => {
+//   const auth = req.isAuthenticated && req.isAuthenticated();
+//   let message = "";
 
-  if (req.query.message === "already_logged_in") {
-    message = "You are already logged in.";
-  }
-  if (req.query.message === "logged_in") {
-    message = "You are now logged in.";
-  }
-  if (req.query.message === "login_failed") {
-    message = "Login failed. Please try again.";
-  }
+//   if (req.query.message === "already_logged_in") {
+//     message = "You are already logged in.";
+//   }
+//   if (req.query.message === "logged_in") {
+//     message = "You are now logged in.";
+//   }
+//   if (req.query.message === "login_failed") {
+//     message = "Login failed. Please try again.";
+//   }
 
-  res.send(`
-    <h1>CSE341 API</h1>
-    ${message ? `<p>${message}</p>` : ""}
-    ${auth ? `<p>Logged in as ${req.user.displayName}</p><a href="/api/auth/logout">Logout</a>` : `<a href="/login">Login</a>`}
-    <p><a href="/api-docs">API Docs</a></p>
-  `);
-});
+//   res.send(`
+//     <h1>CSE341 API</h1>
+//     ${message ? `<p>${message}</p>` : ""}
+//     ${auth ? `<p>Logged in as ${req.user.displayName}</p><a href="/api/auth/logout">Logout</a>` : `<a href="/login">Login</a>`}
+//     <p><a href="/api-docs">API Docs</a></p>
+//   `);
+// });
 
 app.use((req, res) =>
   res.status(404).json({ success: false, error: "Route not found" }),
