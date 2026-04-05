@@ -37,7 +37,7 @@ const doc = {
         email: { type: "string" },
         phone: { type: "string" },
         address: { type: "string" },
-        dateOfBirth: { type: "string" },
+        dateOfBirth: { type: "date" },
         role: { type: "string" },
       },
     },

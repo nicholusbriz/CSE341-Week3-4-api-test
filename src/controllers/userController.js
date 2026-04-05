@@ -8,9 +8,10 @@ exports.getUsers = async (req, res) => {
       data: users,
     });
   } catch (error) {
+    console.error('Error getting users:', error);
     res.status(500).json({
       success: false,
-      error: "Server error",
+      error: "Failed to retrieve users",
     });
   }
 };
@@ -29,9 +30,10 @@ exports.getUser = async (req, res) => {
       data: user,
     });
   } catch (error) {
+    console.error('Error getting user:', error);
     res.status(500).json({
       success: false,
-      error: "Server error",
+      error: "Failed to retrieve user",
     });
   }
 };

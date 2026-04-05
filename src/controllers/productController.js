@@ -8,9 +8,10 @@ exports.getProducts = async (req, res) => {
       data: products,
     });
   } catch (error) {
+    console.error('Error getting products:', error);
     res.status(500).json({
       success: false,
-      error: "Server error",
+      error: "Failed to retrieve products",
     });
   }
 };
@@ -29,9 +30,10 @@ exports.getProduct = async (req, res) => {
       data: product,
     });
   } catch (error) {
+    console.error('Error getting product:', error);
     res.status(500).json({
       success: false,
-      error: "Server error",
+      error: "Failed to retrieve product",
     });
   }
 };
