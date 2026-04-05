@@ -358,9 +358,6 @@
           "example": [
             "firstName",
             "lastName",
-            "email",
-            "phone",
-            "address",
             "dateOfBirth",
             "role"
           ],
@@ -530,12 +527,5 @@
         }
       }
     }
-  },
-  "ignore": [
-    "/login",
-    "/",
-    "/api/auth/github",
-    "/api/auth/github/callback",
-    "/api/auth/logout"
-  ]
+  }
 }

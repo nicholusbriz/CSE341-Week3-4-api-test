@@ -11,7 +11,7 @@ exports.getUsers = async (req, res) => {
     console.error('Error getting users:', error);
     res.status(500).json({
       success: false,
-      error: "Failed to retrieve users",
+      error: "Failed to get users",
     });
   }
 };
