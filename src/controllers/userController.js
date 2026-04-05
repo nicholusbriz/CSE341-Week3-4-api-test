@@ -38,21 +38,12 @@ exports.getUser = async (req, res) => {
 
 exports.createUser = async (req, res) => {
   try {
-    const { firstName, lastName, email, phone, address, dateOfBirth, role } =
-      req.body;
+    const { firstName, lastName, email, phone, address, dateOfBirth, role } = req.body;
 
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !phone ||
-      !address ||
-      !dateOfBirth ||
-      !role
-    ) {
+    if (!firstName || !lastName || !email || !phone || !address || !dateOfBirth || !role) {
       return res.status(400).json({
         success: false,
-        error: "Missing required fields",
+        error: "Missing required fields"
       });
     }
 
@@ -68,12 +59,12 @@ exports.createUser = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      data: user,
+      data: user
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: "Could not save user",
+      error: "Server error"
     });
   }
 };
@@ -87,18 +78,18 @@ exports.updateUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        error: "User not found",
+        error: "User not found"
       });
     }
 
     res.status(200).json({
       success: true,
-      data: user,
+      data: user
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: "Could not update user",
+      error: "Server error"
     });
   }
 };
