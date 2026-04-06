@@ -76,7 +76,6 @@ exports.updateUser = async (req, res) => {
     const { id } = req.params;
     const { firstName, lastName, email, phone, address, dateOfBirth, role } = req.body;
 
-    // Check if user exists
     const existingUser = await User.findById(id);
     if (!existingUser) {
       return res.status(404).json({
@@ -85,7 +84,6 @@ exports.updateUser = async (req, res) => {
       });
     }
 
-    // Build update object with only provided fields
     const updateFields = {};
     if (firstName !== undefined) updateFields.firstName = firstName;
     if (lastName !== undefined) updateFields.lastName = lastName;

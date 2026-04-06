@@ -12,13 +12,11 @@ const userRoutes = require("./src/routes/userRoutes");
 const productRoutes = require("./src/routes/productRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 
-// Connect to database
 connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Session setup for authentication
 app.use(session({
   secret: process.env.SESSION_SECRET || "mysecretkey",
   resave: false,
@@ -26,15 +24,12 @@ app.use(session({
   cookie: { secure: false, sameSite: "lax", maxAge: 24 * 60 * 60 * 1000 },
 }));
 
-// CORS setup
 app.use(cors({ origin: ["https://cse341-ncxu.onrender.com", "http://localhost:3000"], credentials: true }));
 app.use(express.json());
 
-// Passport authentication setup
 app.use(passport.initialize());
 app.use(passport.session());
 
-// GitHub OAuth strategy
 passport.use(new GitHubStrategy(
   {
     clientID: process.env.CLIENT_ID,
@@ -50,13 +45,11 @@ passport.use(new GitHubStrategy(
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((user, done) => done(null, user));
 
-// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 
-// Home page route
 app.get("/", (req, res) => {
   console.log("Home page accessed, checking authentication");
   const isAuth = req.isAuthenticated?.() || false;
@@ -77,7 +70,6 @@ app.get("/", (req, res) => {
   `);
 });
 
-// 404 handler
 app.use((req, res) => {
   console.log("404 - Route not found:", req.originalUrl);
   res.status(404).json({
@@ -86,7 +78,6 @@ app.use((req, res) => {
   });
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`API documentation available at http://localhost:${PORT}/api-docs`);

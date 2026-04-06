@@ -76,7 +76,6 @@ exports.updateProduct = async (req, res) => {
     const { id } = req.params;
     const { name, description, price, category, stock, sku, brand } = req.body;
 
-    // Check if product exists
     const existingProduct = await Product.findById(id);
     if (!existingProduct) {
       return res.status(404).json({
@@ -85,7 +84,6 @@ exports.updateProduct = async (req, res) => {
       });
     }
 
-    //Bulid update object
     const updateFields = {};
     if (name !== undefined) updateFields.name = name;
     if (description !== undefined) updateFields.description = description;
