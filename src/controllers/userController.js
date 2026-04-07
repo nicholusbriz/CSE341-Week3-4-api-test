@@ -85,13 +85,97 @@ exports.updateUser = async (req, res) => {
     }
 
     const updateFields = {};
-    if (firstName !== undefined) updateFields.firstName = firstName;
-    if (lastName !== undefined) updateFields.lastName = lastName;
-    if (email !== undefined) updateFields.email = email;
-    if (phone !== undefined) updateFields.phone = phone;
-    if (address !== undefined) updateFields.address = address;
-    if (dateOfBirth !== undefined) updateFields.dateOfBirth = dateOfBirth;
-    if (role !== undefined) updateFields.role = role;
+
+    if (firstName !== undefined) {
+      if (!firstName || firstName.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          error: 'First name cannot be empty'
+        });
+      }
+      updateFields.firstName = firstName;
+    }
+
+    if (lastName !== undefined) {
+      if (!lastName || lastName.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          error: 'Last name cannot be empty'
+        });
+      }
+      updateFields.lastName = lastName;
+    }
+
+    if (email !== undefined) {
+      if (!email || email.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          error: 'Email cannot be empty'
+        });
+      }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid email format'
+        });
+      }
+      updateFields.email = email;
+    }
+
+    if (phone !== undefined) {
+      if (!phone || phone.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          error: 'Phone cannot be empty'
+        });
+      }
+      updateFields.phone = phone;
+    }
+
+    if (address !== undefined) {
+      if (!address || address.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          error: 'Address cannot be empty'
+        });
+      }
+      updateFields.address = address;
+    }
+
+    if (dateOfBirth !== undefined) {
+      if (!dateOfBirth) {
+        return res.status(400).json({
+          success: false,
+          error: 'Date of birth cannot be empty'
+        });
+      }
+      const dob = new Date(dateOfBirth);
+      if (isNaN(dob.getTime())) {
+        return res.status(400).json({
+          success: false,
+          error: 'Invalid date of birth format'
+        });
+      }
+      updateFields.dateOfBirth = dateOfBirth;
+    }
+
+    if (role !== undefined) {
+      if (!role || role.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          error: 'Role cannot be empty'
+        });
+      }
+      updateFields.role = role;
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'At least one field must be provided for update'
+      });
+    }
 
     const result = await User.updateOne(
       { _id: id },

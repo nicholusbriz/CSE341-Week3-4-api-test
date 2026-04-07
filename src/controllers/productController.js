@@ -85,13 +85,47 @@ exports.updateProduct = async (req, res) => {
     }
 
     const updateFields = {};
-    if (name !== undefined) updateFields.name = name;
-    if (description !== undefined) updateFields.description = description;
-    if (price !== undefined) updateFields.price = price;
-    if (category !== undefined) updateFields.category = category;
-    if (stock !== undefined) updateFields.stock = stock;
-    if (sku !== undefined) updateFields.sku = sku;
-    if (brand !== undefined) updateFields.brand = brand;
+    const requiredFields = ['name', 'description', 'category', 'sku', 'brand'];
+    const numericFields = ['price', 'stock'];
+
+    for (const field of requiredFields) {
+      if (req.body[field] !== undefined) {
+        if (!req.body[field] || req.body[field].trim() === '') {
+          return res.status(400).json({
+            success: false,
+            error: `Product ${field} cannot be empty`
+          });
+        }
+        updateFields[field] = req.body[field];
+      }
+    }
+
+    if (req.body.price !== undefined) {
+      if (isNaN(req.body.price) || req.body.price <= 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Price must be a positive number'
+        });
+      }
+      updateFields.price = parseFloat(req.body.price);
+    }
+
+    if (req.body.stock !== undefined) {
+      if (isNaN(req.body.stock) || req.body.stock < 0) {
+        return res.status(400).json({
+          success: false,
+          error: 'Stock must be a positive number'
+        });
+      }
+      updateFields.stock = parseInt(req.body.stock);
+    }
+
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'At least one field must be provided for update'
+      });
+    }
 
     const result = await Product.updateOne(
       { _id: id },
